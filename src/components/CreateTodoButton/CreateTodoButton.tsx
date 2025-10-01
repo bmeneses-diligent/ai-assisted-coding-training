@@ -1,32 +1,14 @@
-import React, { useState } from 'react';
-import { Button, Box } from '@mui/material';
-import { TodoModal } from '../TodoModal/TodoModal';
+import React from 'react';
+import { Button } from '@mui/material';
 
-export const CreateTodoButton: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+interface CreateTodoButtonProps {
+  onClick: () => void;
+}
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
+export const CreateTodoButton: React.FC<CreateTodoButtonProps> = ({ onClick }) => {
   return (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenModal}
-          data-testid="create-todo-button"
-        >
-          Add Todo
-        </Button>
-      </Box>
-
-      <TodoModal isOpen={isModalOpen} onClose={handleCloseModal} mode="create" />
-    </>
+    <Button variant="contained" color="primary" onClick={onClick} data-testid="create-todo-button">
+      Add Todo
+    </Button>
   );
 };
