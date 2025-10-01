@@ -2,79 +2,57 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CreateTodoButton } from '../components/CreateTodoButton/CreateTodoButton';
-// useTodo is mocked via vi.mock
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-
-// Mock the TodoModal component
-vi.mock('../components/TodoModal/TodoModal', () => ({
-  TodoModal: ({ isOpen, mode, onClose }: { isOpen: boolean; mode: string; onClose: () => void }) =>
-    isOpen ? (
-      <div data-testid="mocked-modal">
-        <div data-testid="modal-mode">{mode}</div>
-        <button data-testid="modal-close" onClick={onClose}>
-          Close
-        </button>
-      </div>
-    ) : null,
-}));
-
-// Mock the useTodo hook
-vi.mock('../contexts/TodoContext', () => ({
-  useTodo: vi.fn(() => ({
-    addTodo: vi.fn(),
-  })),
-}));
+import { vi, describe, it, expect } from 'vitest';
 
 describe('CreateTodoButton Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('renders a button with correct text', () => {
-    render(<CreateTodoButton />);
+  it('renders the button', () => {
+    const mockOnClick = vi.fn();
+    render(<CreateTodoButton onClick={mockOnClick} />);
 
     const button = screen.getByTestId('create-todo-button');
     expect(button).toBeInTheDocument();
-    expect(button.textContent).toBe('Add Todo');
+    expect(button).toHaveTextContent('Add Todo');
   });
 
-  it('initially renders with modal closed', () => {
-    render(<CreateTodoButton />);
-
-    // Check that the modal is not rendered initially
-    expect(screen.queryByTestId('mocked-modal')).not.toBeInTheDocument();
-  });
-
-  it('opens modal when button is clicked', async () => {
+  it('calls onClick when button is clicked', async () => {
+    const mockOnClick = vi.fn();
     const user = userEvent.setup();
-    render(<CreateTodoButton />);
+    render(<CreateTodoButton onClick={mockOnClick} />);
 
-    // Initially modal should be closed
-    expect(screen.queryByTestId('mocked-modal')).not.toBeInTheDocument();
-
-    // Click the button to open modal
+    // Click the button
     await user.click(screen.getByTestId('create-todo-button'));
 
-    // After click, modal should be opened
-    const modal = screen.getByTestId('mocked-modal');
-    expect(modal).toBeInTheDocument();
-    expect(screen.getByTestId('modal-mode').textContent).toBe('create');
+    // Should call onClick handler
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
   });
 
-  it('closes modal when close button is clicked', async () => {
+  it('has correct styling and accessibility', () => {
+    const mockOnClick = vi.fn();
+    render(<CreateTodoButton onClick={mockOnClick} />);
+
+    const button = screen.getByTestId('create-todo-button');
+
+    // Check button is of type button
+    expect(button).toHaveAttribute('type', 'button');
+
+    // Check it has the correct class for variant and color
+    expect(button).toHaveClass('MuiButton-contained');
+    expect(button).toHaveClass('MuiButton-colorPrimary');
+  });
+
+  it('can be clicked multiple times', async () => {
+    const mockOnClick = vi.fn();
     const user = userEvent.setup();
-    render(<CreateTodoButton />);
+    render(<CreateTodoButton onClick={mockOnClick} />);
 
-    // Open the modal first
-    await user.click(screen.getByTestId('create-todo-button'));
+    const button = screen.getByTestId('create-todo-button');
 
-    // Modal should be open
-    expect(screen.getByTestId('mocked-modal')).toBeInTheDocument();
+    // Click the button multiple times
+    await user.click(button);
+    await user.click(button);
+    await user.click(button);
 
-    // Click the close button
-    await user.click(screen.getByTestId('modal-close'));
-
-    // Modal should be closed
-    expect(screen.queryByTestId('mocked-modal')).not.toBeInTheDocument();
+    // Should be called 3 times
+    expect(mockOnClick).toHaveBeenCalledTimes(3);
   });
 });
