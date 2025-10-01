@@ -1,5 +1,16 @@
 import React from 'react';
-import { ListItem, ListItemText, IconButton, Checkbox, Divider, Typography } from '@mui/material';
+import {
+  ListItem,
+  ListItemText,
+  IconButton,
+  Checkbox,
+  Divider,
+  Typography,
+  Box,
+  Chip,
+} from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { format, parseISO, isBefore, startOfToday } from 'date-fns';
 import type { Todo } from '../../types/Todo';
 import { useTodo } from '../../hooks/useTodo';
 
@@ -10,6 +21,9 @@ interface TodoItemProps {
 
 export const TodoItem: React.FC<TodoItemProps> = ({ todo, onEditClick }) => {
   const { toggleTodoCompletion, deleteTodo } = useTodo();
+
+  // Check if due date is overdue
+  const isOverdue = todo.dueDate && isBefore(parseISO(todo.dueDate), startOfToday());
 
   return (
     <>
@@ -50,16 +64,30 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onEditClick }) => {
         <ListItemText
           disableTypography
           primary={
-            <Typography
-              variant="body1"
-              sx={{
-                textDecoration: todo.completed ? 'line-through' : 'none',
-                color: todo.completed ? 'text.secondary' : 'text.primary',
-                fontWeight: 500,
-              }}
-            >
-              {todo.title}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: todo.completed ? 'text.secondary' : 'text.primary',
+                  fontWeight: 500,
+                }}
+              >
+                {todo.title}
+              </Typography>
+              {todo.dueDate && (
+                <Chip
+                  icon={isOverdue && !todo.completed ? <WarningAmberIcon /> : undefined}
+                  label={format(parseISO(todo.dueDate), 'PP')}
+                  size="small"
+                  color={isOverdue && !todo.completed ? 'error' : 'default'}
+                  sx={{
+                    height: '20px',
+                    fontSize: '0.75rem',
+                  }}
+                />
+              )}
+            </Box>
           }
           secondary={
             <Typography
